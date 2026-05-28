@@ -103,7 +103,7 @@ body {
 img { max-width: 100%; height: auto; display: block; }
 
 .container {
-  max-width: 1200px;
+  max-width: 1380px;
   margin: 0 auto;
   padding: 0 24px;
 }
@@ -160,7 +160,7 @@ nav {
 }
 
 .nav-inner {
-  max-width: 1200px;
+  max-width: 1380px;
   margin: 0 auto;
   display: flex;
   align-items: center;
@@ -246,7 +246,7 @@ nav {
 }
 
 .hero-content {
-  max-width: 1200px;
+  max-width: 1380px;
   margin: 0 auto;
   width: 100%;
   text-align: center;
@@ -1874,29 +1874,45 @@ document.getElementById('year').textContent = new Date().getFullYear();
 // Form submissions (mock - replace with real backend / form provider)
 function submitForm(e) {
   e.preventDefault();
+  const btn = e.target.querySelector('.btn-submit');
+  const orig = btn.textContent;
+  btn.textContent = 'Sending...'; btn.disabled = true;
   const data = {
     name: document.getElementById('name').value,
     phone: document.getElementById('phone').value,
     email: document.getElementById('email').value,
     config: document.getElementById('config').value,
     message: document.getElementById('message').value,
-    source: 'Oberoi 360 North Landing - Main Form',
-    timestamp: new Date().toISOString()
+    _subject: 'New Lead — Oberoi 360 North (Main Form)',
+    source: 'Oberoi 360 North Landing - Main Form'
   };
-  console.log('Lead captured:', data);
-  // TODO: send to backend / Formspree / Google Sheets
-  document.getElementById('leadForm').reset();
-  showToast('Thank you. Our advisor will call you within 24 hours.');
+  fetch('https://formspree.io/f/mlgadedp', {
+    method: 'POST',
+    headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' },
+    body: JSON.stringify(data)
+  }).then(r => {
+    if (r.ok) {
+      document.getElementById('leadForm').reset();
+      showToast('Thank you. Our advisor will call you within 24 hours.');
+    } else {
+      showToast('Something went wrong. Please call +91 85952 21631.');
+    }
+  }).catch(() => showToast('Network error. Please call +91 85952 21631.'))
+    .finally(() => { btn.textContent = orig; btn.disabled = false; });
   return false;
 }
 
 function submitExit(e) {
   e.preventDefault();
   const phone = document.getElementById('exitPhone').value;
-  console.log('Exit lead:', { phone, source: 'Exit Intent Popup', timestamp: new Date().toISOString() });
-  // TODO: send to backend
-  closeExit();
-  showToast('Got it — we will call you back shortly.');
+  fetch('https://formspree.io/f/mlgadedp', {
+    method: 'POST',
+    headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' },
+    body: JSON.stringify({ phone: phone, _subject: 'New Lead — Oberoi 360 North (Exit Popup)', source: 'Exit Intent Popup' })
+  }).then(r => {
+    closeExit();
+    showToast(r.ok ? 'Got it — we will call you back shortly.' : 'Please call +91 85952 21631.');
+  }).catch(() => { closeExit(); showToast('Please call +91 85952 21631.'); });
   return false;
 }
 
@@ -1932,19 +1948,31 @@ function closeFloorPlan() {
 
 function submitFloorPlan(e) {
   e.preventDefault();
+  const btn = e.target.querySelector('.btn-submit');
+  const orig = btn.textContent;
+  btn.textContent = 'Sending...'; btn.disabled = true;
   const data = {
     name: document.getElementById('fp-name').value,
     phone: document.getElementById('fp-phone').value,
     email: document.getElementById('fp-email').value,
     interest: document.getElementById('fp-interest').value,
-    source: 'Floor Plan Popup',
-    timestamp: new Date().toISOString()
+    _subject: 'New Lead — Oberoi 360 North (Floor Plan Request)',
+    source: 'Floor Plan Popup'
   };
-  console.log('Floor plan lead captured:', data);
-  // TODO: send to backend / Formspree / Google Sheets
-  document.getElementById('fpForm').reset();
-  closeFloorPlan();
-  showToast('Floor plans on the way. We will call shortly.');
+  fetch('https://formspree.io/f/mlgadedp', {
+    method: 'POST',
+    headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' },
+    body: JSON.stringify(data)
+  }).then(r => {
+    if (r.ok) {
+      document.getElementById('fpForm').reset();
+      closeFloorPlan();
+      showToast('Floor plans on the way. We will call shortly.');
+    } else {
+      showToast('Something went wrong. Please call +91 85952 21631.');
+    }
+  }).catch(() => showToast('Network error. Please call +91 85952 21631.'))
+    .finally(() => { btn.textContent = orig; btn.disabled = false; });
   return false;
 }
 
